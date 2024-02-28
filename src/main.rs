@@ -2,6 +2,7 @@ use anyhow::{Context, Result};
 use clap::Parser;
 use log::{info, warn};
 
+static LOG_LEVEL: u8 = 0;
 
 /// Search for a pattern in a file and display the lines that contain it.
 #[derive(Parser)]
@@ -18,6 +19,7 @@ fn main() -> Result<()> {
     let args = Cli::parse();
     info!("starting up");
     warn!("oops, nothing implemented!");
+    info!("global value is {LOG_LEVEL}");
 
     let content = std::fs::read_to_string(&args.path)
         .with_context(|| format!("could not read file `{}`", args.path.display()))?;
@@ -31,6 +33,7 @@ fn main() -> Result<()> {
 #[test]
 fn find_a_match() {
     let mut result = Vec::new();
+    info!("global value is {LOG_LEVEL}");
     molly::find_matches("lorem ipsum\ndolor sit amet", "lorem", &mut result);
     assert_eq!(result, b"lorem ipsum\n");
 }

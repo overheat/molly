@@ -1,16 +1,21 @@
 use anyhow::{Context, Result};
 use clap::Parser;
 use log::{info, warn};
-use std::sync::atomic::{AtomicU8, Ordering};
+use once_cell::sync::OnceCell;
+use std::sync::Mutex;
 
-static LOG_LEVEL: AtomicU8 = AtomicU8::new(0);
+static LOG_FILE: OnceCell<Mutex<String>> = OnceCell::new();
 
-pub fn get_log_level() -> u8 {
-    LOG_LEVEL.load(Ordering::Relaxed)
+fn ensure_log_file() -> &'static Mutex<String> {
+    LOG_FILE.get_or_init(|| Mutex::new(String::new()))
 }
 
-pub fn set_log_level(level: u8) {
-    LOG_LEVEL.store(level, Ordering::Relaxed);
+pub fn get_log_file() -> String {
+    ensure_log_file().lock().unwrap().clone()
+}
+
+pub fn set_log_file(file: String) {
+    *ensure_log_file().lock().unwrap() = file;
 }
 
 /// Search for a pattern in a file and display the lines that contain it.
@@ -28,8 +33,9 @@ fn main() -> Result<()> {
     let args = Cli::parse();
     info!("starting up");
     warn!("oops, nothing implemented!");
-    set_log_level(1);
-    let a = get_log_level();
+
+    set_log_file(String::from("hello"));
+    let a = get_log_file();
     info!("global value is {a}");
 
     let content = std::fs::read_to_string(&args.path)

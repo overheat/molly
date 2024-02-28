@@ -4,18 +4,14 @@ use log::{info, warn};
 use std::sync::OnceLock;
 use std::sync::Mutex;
 
-static LOG_FILE: OnceLock<Mutex<String>> = OnceLock::new();
+static LOG_FILE: OnceLock<String> = OnceLock::new();
 
-fn ensure_log_file() -> &'static Mutex<String> {
-    LOG_FILE.get_or_init(|| Mutex::new(String::new()))
-}
-
-pub fn get_log_file() -> String {
-    ensure_log_file().lock().unwrap().clone()
+fn get_log_file() -> &'static String {
+    LOG_FILE.get_or_init(|| String::new())
 }
 
 pub fn set_log_file(file: String) {
-    *ensure_log_file().lock().unwrap() = file;
+    LOG_FILE.set(file);
 }
 
 /// Search for a pattern in a file and display the lines that contain it.

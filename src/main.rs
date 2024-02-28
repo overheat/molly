@@ -1,21 +1,17 @@
 use anyhow::{Context, Result};
 use clap::Parser;
 use log::{info, warn};
-use once_cell::sync::OnceCell;
 use std::sync::Mutex;
+use once_cell::sync::Lazy;
 
-static LOG_FILE: OnceCell<Mutex<String>> = OnceCell::new();
-
-fn ensure_log_file() -> &'static Mutex<String> {
-    LOG_FILE.get_or_init(|| Mutex::new(String::new()))
-}
+static LOG_FILE: Lazy<Mutex<String>> = Lazy::new(|| Mutex::new(String::new()));
 
 pub fn get_log_file() -> String {
-    ensure_log_file().lock().unwrap().clone()
+    LOG_FILE.lock().unwrap().clone()
 }
 
 pub fn set_log_file(file: String) {
-    *ensure_log_file().lock().unwrap() = file;
+    *LOG_FILE.lock().unwrap() = file;
 }
 
 /// Search for a pattern in a file and display the lines that contain it.

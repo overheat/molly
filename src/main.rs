@@ -13,6 +13,8 @@ struct Cli {
 }
 
 fn main() -> Result<()> {
+    env_logger::init();
+
     let args = Cli::parse();
     info!("starting up");
     warn!("oops, nothing implemented!");
@@ -20,7 +22,7 @@ fn main() -> Result<()> {
     let content = std::fs::read_to_string(&args.path)
         .with_context(|| format!("could not read file `{}`", args.path.display()))?;
 
-        molly::find_matches(&content, &args.pattern, &mut std::io::stdout());
+    molly::find_matches(&content, &args.pattern, &mut std::io::stdout());
 
     Ok(())
 }

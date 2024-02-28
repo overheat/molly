@@ -2,16 +2,41 @@ use anyhow::{Context, Result};
 use clap::Parser;
 use log::{info, warn};
 use std::sync::OnceLock;
-use std::sync::Mutex;
+use serde::Deserialize;
+use std::fs;
 
-static LOG_FILE: OnceLock<String> = OnceLock::new();
+const CONFIG_FILE: &str = "configs/config.toml";
 
-fn get_log_file() -> &'static String {
-    LOG_FILE.get_or_init(|| String::new())
+#[derive(Deserialize, Debug)]
+pub struct Configs {
+    pub iot: String,
+    pub iot_ats: String,
+    // pub credential: String,
+    // pub jobs: String,
+    pub ca: String,
+    pub cert: String,
+    pub key: String,
 }
 
-pub fn set_log_file(file: String) {
-    LOG_FILE.set(file);
+static CONFIGS: OnceLock<Configs> = OnceLock::new();
+
+impl Configs {
+    pub fn init() {
+        let config = Configs::from_config_file().unwrap();
+    
+        CONFIGS.set(config).unwrap();
+    }
+
+    fn from_config_file() -> Result<Configs, std::io::Error> {
+        let config =
+            fs::read_to_string(CONFIG_FILE).expect("Something went wrong reading the file");
+        let config: Configs = toml::from_str(&config).unwrap();
+        Ok(config)
+    }
+
+    pub fn global() -> &'static Configs {
+        CONFIGS.get().expect("Configs is not initialized.")
+    }
 }
 
 /// Search for a pattern in a file and display the lines that contain it.
@@ -30,9 +55,8 @@ fn main() -> Result<()> {
     info!("starting up");
     warn!("oops, nothing implemented!");
 
-    set_log_file(String::from("hello"));
-    let a = get_log_file();
-    info!("global value is {a}");
+    Configs::init();
+    print!("{:?}", CONFIGS.get());
 
     let content = std::fs::read_to_string(&args.path)
         .with_context(|| format!("could not read file `{}`", args.path.display()))?;
@@ -46,9 +70,17 @@ fn main() -> Result<()> {
 #[test]
 fn find_a_match() {
     let mut result = Vec::new();
-    info!("global value is {LOG_LEVEL}");
     molly::find_matches("lorem ipsum\ndolor sit amet", "lorem", &mut result);
     assert_eq!(result, b"lorem ipsum\n");
 }
 
+#[test]
+    fn global_config_test() {
+        use Configs;
+        Configs::init();
+
+        assert_eq!(Configs::global().ca, "certs/AmazonRootCA1.pem");
+        assert_eq!(Configs::global().cert, "certs/certificate.pem.crt");
+        assert_eq!(Configs::global().key, "certs/private.pem.key");
+    }
   

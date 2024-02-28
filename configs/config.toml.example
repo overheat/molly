@@ -1,0 +1,12 @@
+# This is a config file
+
+[endpoint]
+iot = "xxx.iot.us-west-2.amazonaws.com"
+iot_ats = "xxx-ats.iot.us-west-2.amazonaws.com"
+# credential = "xxx.credentials.iot.us-west-2.amazonaws.com"
+# jobs = "xxx.jobs.iot.us-west-2.amazonaws.com"
+
+[certificates]
+ca = "certs/AmazonRootCA1.pem"
+cert = "certs/certificate.pem.crt"
+key = "certs/private.pem.key"

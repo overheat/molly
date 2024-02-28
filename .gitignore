@@ -19,3 +19,5 @@ Cargo.lock
 /target
 /certs
 **/.DS_Store
+**/*.swp
+configs/config.toml

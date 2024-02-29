@@ -18,6 +18,7 @@ MQTT observability.
 - Mqtt
     - rumqttc
     - aws iot core
+    - Signal handling
     - aws iot rules
     - 
 - Web

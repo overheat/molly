@@ -24,6 +24,11 @@ struct Cli {
 async fn main() -> Result<(), Box<dyn Error>> {
     env_logger::init();
 
+    ctrlc::set_handler(move || {
+        println!("received Ctrl+C!");
+    })
+    .expect("Error setting Ctrl-C handler");
+
     molly::Configs::init();
     // print!("{:?}", molly::Configs::global());
 
@@ -37,14 +42,13 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let mut mqttoptions = MqttOptions::new(name, endpoint, 8883);
     mqttoptions.set_keep_alive(std::time::Duration::from_secs(KEEP_ALIVE_INTERVAL));
 
-    let ca = include_bytes!("../certs/AmazonRootCA1.pem");
+    let aws_ca = include_bytes!("../certs/AmazonRootCA1.pem");
     let client_cert = include_bytes!("../certs/certificate.pem.crt");
     let client_key = include_bytes!("../certs/private.pem.key");
 
-    let ca = ca.to_vec();
 
     let transport = Transport::Tls(TlsConfiguration::Simple {
-        ca,
+        ca: aws_ca.to_vec(),
         alpn: None,
         client_auth: Some((client_cert.to_vec(), client_key.to_vec())),
     });
@@ -58,31 +62,11 @@ async fn main() -> Result<(), Box<dyn Error>> {
     .await
     .unwrap();
 
-    loop {
-        let notification = match eventloop.poll().await {
-            Ok(v) => {
-                println!("Event = {v:?}");
-            }
-            Err(e) => {
-                println!("Error = {e:?}");
-                break;
-            }
-        };
+    while let Ok(notification) = eventloop.poll().await {
         println!("Received = {:?}", notification);
     }
 
     Ok(())
-
-    // let args = Cli::parse();
-    // warn!("oops, nothing implemented!");
-
-
-    // let content = std::fs::read_to_string(&args.path)
-    //     .with_context(|| format!("could not read file `{}`", args.path.display()))?;
-
-    // molly::find_matches(&content, &args.pattern, &mut std::io::stdout());
-
-    // Ok(())
 }
 
 

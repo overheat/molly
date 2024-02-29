@@ -3,6 +3,7 @@ use clap::Parser;
 use log::{info, warn};
 use molly::{AWS_IOT_MQTT_ALPN, HELLO_WORLD_TOPIC, KEEP_ALIVE_INTERVAL};
 use rumqttc::{AsyncClient, MqttOptions, QoS, TlsConfiguration, Transport};
+use serde_json::json;
 use std::fs;
 use std::{error::Error, time::Duration};
 use tokio::{task, time};
@@ -35,7 +36,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
     env_logger::init();
 
     molly::Configs::init();
-    // print!("{:?}", molly::Configs::global());
 
     let name = CLIENT_ID;
     let endpoint = molly::Configs::global().iot_ats.to_string();
@@ -68,8 +68,19 @@ async fn main() -> Result<(), Box<dyn Error>> {
     .unwrap();
 
     task::spawn(async move {
+        let full_name = "John Doe";
+let age_last_year = 42;
+
+// The type of `john` is `serde_json::Value`
+let john = json!({
+    "name": full_name,
+    "age": age_last_year + 1,
+    "phones": [
+        format!("+86 {}", 1234567890)
+    ]
+});
         for i in 0..10 {
-            client.publish(HELLO_WORLD_TOPIC, QoS::AtLeastOnce, false, vec![i; i as usize]).await.unwrap();
+            client.publish(HELLO_WORLD_TOPIC, QoS::AtLeastOnce, false, john.to_string()).await.unwrap();
             time::sleep(Duration::from_millis(100)).await;
         }
     });

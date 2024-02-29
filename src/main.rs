@@ -19,16 +19,20 @@ struct Cli {
     path: std::path::PathBuf,
 }
 
-// fn main() -> Result<()> {
+/// The current_thread runtime flavor is a lightweight, single-threaded runtime. 
+/// It is a good choice when only spawning a few tasks and opening a handful of sockets. 
+/// https://tokio.rs/tokio/tutorial/shared-state
 #[tokio::main(flavor = "current_thread")]
 
 async fn main() -> Result<(), Box<dyn Error>> {
-    env_logger::init();
+    tokio::spawn(async move {
+        tokio::signal::ctrl_c().await.unwrap();
+        info!("received ctrl-c event");
+        // disconnect mqtt client and exit application.
+        std::process::exit(0);
+    });
 
-    ctrlc::set_handler(move || {
-        println!("received Ctrl+C!");
-    })
-    .expect("Error setting Ctrl-C handler");
+    env_logger::init();
 
     molly::Configs::init();
     // print!("{:?}", molly::Configs::global());

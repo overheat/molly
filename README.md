@@ -19,6 +19,7 @@ MQTT observability.
     - ~~rumqttc~~
     - ~~aws iot core~~
     - ~~Signal handling~~
+        - Graceful Shutdown https://tokio.rs/tokio/topics/shutdown
     - aws iot rules
     - 
 - Web

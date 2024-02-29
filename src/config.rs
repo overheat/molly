@@ -2,8 +2,6 @@ use std::sync::OnceLock;
 use serde::Deserialize;
 use std::fs;
 
-const CONFIG_FILE: &str = "configs/config.toml";
-
 #[derive(Deserialize, Debug)]
 pub struct Configs {
     pub iot: String,
@@ -26,7 +24,7 @@ impl Configs {
 
     fn from_config_file() -> Result<Configs, std::io::Error> {
         let config =
-            fs::read_to_string(CONFIG_FILE).expect("Something went wrong reading the file");
+            fs::read_to_string(crate::CONFIG_FILE).expect("Something went wrong reading the file");
         let config: Configs = toml::from_str(&config).unwrap();
         Ok(config)
     }

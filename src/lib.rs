@@ -9,3 +9,5 @@ pub fn find_matches(content: &str, pattern: &str, mut writer: impl std::io::Writ
 pub mod config;
 
 pub use config::Configs;
+
+pub const CONFIG_FILE: &str = "configs/config.toml";

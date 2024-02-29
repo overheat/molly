@@ -5,6 +5,7 @@ use molly::{AWS_IOT_MQTT_ALPN, HELLO_WORLD_TOPIC, KEEP_ALIVE_INTERVAL};
 use rumqttc::{AsyncClient, MqttOptions, QoS, TlsConfiguration, Transport};
 use std::fs;
 use std::{error::Error, time::Duration};
+use tokio::{task, time};
 
 
 const CLIENT_ID: &str = "molly";
@@ -61,6 +62,13 @@ async fn main() -> Result<(), Box<dyn Error>> {
     .subscribe(HELLO_WORLD_TOPIC, QoS::AtMostOnce)
     .await
     .unwrap();
+
+    task::spawn(async move {
+        for i in 0..10 {
+            client.publish(HELLO_WORLD_TOPIC, QoS::AtLeastOnce, false, vec![i; i as usize]).await.unwrap();
+            time::sleep(Duration::from_millis(100)).await;
+        }
+    });
 
     while let Ok(notification) = eventloop.poll().await {
         println!("Received = {:?}", notification);

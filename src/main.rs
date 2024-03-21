@@ -38,7 +38,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     molly::Configs::init();
 
     let name = CLIENT_ID;
-    let endpoint = molly::Configs::global().iot_ats.to_string();
+    let endpoint = &molly::Configs::global().iot_ats;
     // let ca = molly::Configs::global().ca.to_string();
     // let cert = molly::Configs::global().cert.to_string();
     // let key = molly::Configs::global().key.to_string();
